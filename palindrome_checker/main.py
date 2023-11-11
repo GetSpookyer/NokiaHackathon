@@ -1,18 +1,22 @@
 
 #Initial data input
 file = open('input.txt', "r")
-stringsFromFile = file.readlines()
+stringArray = file.readlines()
 file.close()
 
 #making the data more usabale for me.
 whatToDisappear = [" ",".",",","?","!","(",")",'"',"'","\n"]
-for x in range(len(stringsFromFile)):
+for x in range(len(stringArray)):
     for y in range(len(whatToDisappear)):
-        stringsFromFile[x] = stringsFromFile[x].replace(whatToDisappear[y],"")
-    stringsFromFile[x] = list(stringsFromFile[x].lower())
+        stringArray[x] = stringArray[x].replace(whatToDisappear[y],"")
+    stringArray[x] = list(stringArray[x].lower())
 
-def palCheck(stringArray):
-    length = len(stringArray)
+    
+
+#creating the output array and checking for palindromes
+printoutData = []
+for x in range(len(stringArray)):
+    length = len(stringArray[x])
     if length%2 == 0:
         steps = int((length/2))
     else:
@@ -27,14 +31,10 @@ def palCheck(stringArray):
             isPalindrome = False
             break
     if isPalindrome == True:
-        return("Yes, "+str(len(charsInString)))
+        printable = ("Yes, "+str(len(charsInString)))
     else:
-        return("No, -1")
-
-#creating the output array
-printoutData = []
-for x in range(len(stringsFromFile)):
-    printoutData.append(palCheck(stringsFromFile))
+        printable = ("No, -1")
+    printoutData.append(printable)
         
 
 #printing the output array
