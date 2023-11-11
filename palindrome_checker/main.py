@@ -31,9 +31,9 @@ for x in range(len(stringArray)):
             isPalindrome = False
             break
     if isPalindrome == True:
-        printable = ("Yes, "+str(len(charsInString)))
+        printable = ("YES, "+str(len(charsInString)))
     else:
-        printable = ("No, -1")
+        printable = ("NO, -1")
     printoutData.append(printable)
         
 
