@@ -1,0 +1,101 @@
+name: hackaton-workflow
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  HACKATON_SERVER: https://139-162-167-133.ip.linodeusercontent.com/
+  GLOBAL_TIMEOUT: 10
+  PYTHON_VER: 3.11
+
+jobs:
+  collect_task_folders:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set matrix value
+        id: set-matrix
+        run: |
+          python3 .github/collect_task_folders.py \
+            "${{ env.HACKATON_SERVER }}" \
+            '${{ github.repository }}' \
+            '${{ github.run_id }}'
+
+  test_solution:
+    runs-on: ubuntu-latest
+    needs: [collect_task_folders]
+    strategy:
+      matrix: ${{ fromJson(needs.collect_task_folders.outputs.matrix) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VER }}
+
+      - name: Install dependencies if there is any
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Test solution
+        run: |
+          python3 .github/test_solution.py \
+            "${{ matrix.folder }}" \
+            '${{ env.GLOBAL_TIMEOUT }}'
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          if-no-files-found: error
+          name: ${{ matrix.folder }}
+          path: |
+            ${{ matrix.folder }}/result.json
+
+  handle_results:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    needs: [collect_task_folders, test_solution]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Send results to server
+        run: |
+          python3 .github/collect_test_results.py \
+            "${{ env.HACKATON_SERVER }}" \
+            '${{ needs.collect_task_folders.outputs.matrix }}' \
+            '${{ github.repository }}' \
+            '${{ github.run_id }}' \
+            '${{ github.sha }}'
+
+      - name: Clean up artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const res = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            res.data.artifacts
+              .forEach(({ id }) => {
+                github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: id,
+                })
+              })
