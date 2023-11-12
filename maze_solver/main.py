@@ -106,6 +106,13 @@ def solveMaze(m): #this is the maze array. it is single letter as it is used ver
 
 #printing the way we found
 pathA = solveMaze(mazeA)
+print("A")
+print(pathA)
 pathB = solveMaze(mazeB)
+print(" ")
+print("B")
+print(pathB)
 pathC = solveMaze(mazeC)
-print("A\n",pathA,"\n\n","B\n",pathB,"\n\n","C\n",pathC)
+print(" ")
+print("C")
+print(pathC)
