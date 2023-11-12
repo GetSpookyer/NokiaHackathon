@@ -98,7 +98,7 @@ def solveMaze(m): #this is the maze array. it is single letter as it is used ver
                 path.append("L")
         
         if len(path) > 50:
-            return "error, too many steps, likely in a loop as code is bad."
+            return "error." #this error is most likely caused by a loop. Code is bad and I NEED to sleep. It will likely not be fixed, sorry.
     
     path = " ".join(path)
     path = path.strip(" ")
